@@ -36,7 +36,7 @@ var ObserveAll =  Mixin.create({
             if(callback) {
               callback(key);
             }            
-          })
+          });
         });
       }
     });    
