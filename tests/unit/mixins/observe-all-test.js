@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import ObserveAllMixin from '../../../mixins/observe-all';
+import ObserveAllMixin from 'ember-cli-observe-all/mixins/observe-all';
 import { module, test } from 'qunit';
 
 module('ObserveAllMixin');
