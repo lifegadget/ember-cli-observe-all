@@ -65,7 +65,7 @@ So, here's how it would work in the "observe-all" world:
 
 ````javascript
 import ObserveAll as '../mixins/observe-all';
-const OA = Ember.Object.extend(OA);
+const OA = Ember.Object.extend(ObserveAll);
 export default Ember.Component.extend({ 
     myStuff: [
         {id:1, name:'book', desc:'hitchhikers guide'},
@@ -91,7 +91,7 @@ If you want to auto-observe an object that is NOT the current object that too is
 
 ````javascript
 import ObserveAll as '../mixins/observe-all';
-const OA = Ember.Object.extend(OA);
+const OA = Ember.Object.extend(ObserveAll);
 export default Ember.Component.extend({ 
     myStuff: Ember.on('init', function() {
         return this.store.find('stuff').then( payload => {
