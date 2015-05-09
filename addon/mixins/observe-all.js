@@ -28,10 +28,10 @@ var ObserveAll =  Mixin.create({
     keys(object).forEach( key => {
       let objectKey = object.get(key);
       if(typeOf(objectKey) !== 'function' && key.substr(0,1) !== '_') {
-        object.set('_propertyChanged',false);
+        object.set('_propertyChanged','mutex');
         object.addObserver(key, () => {
           run.next( () => {
-            object.toggleProperty('_propertyChanged');
+            object.notifyPropertyChange('_propertyChanged');
             object.set('_changedProperty', key);
             if(callback) {
               callback(key);
