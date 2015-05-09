@@ -55,13 +55,17 @@ test('DOES observe changed properties created after call to create() which are n
   let done = assert.async();
   assert.expect(2);
   let watched = TestObject.create({
-    bar: 'bar'
-  });
-  let watcher = computed('watched', function() {
-    assert.equal('bar', 'barred');
-    done();
+    bar: 'bar',
+    _propertyChangedCallback: () => {
+      assert.equal('barred', watched.bar);
+      done();
+    }
   });
   assert.equal('bar', watched.bar);
-  watched.set('bar','barred');  
+  watched.set('bar','barred'); 
+  
+  run.later( () => {
+    assert.ok(false, 'Observation of "bar" property change did not happen');
+  },50);
 });
 
