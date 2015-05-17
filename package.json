@@ -1,7 +1,7 @@
 {
   "name": "ember-cli-observe-all",
-  "version": "0.0.1",
-  "description": "The default blueprint for ember-cli addons.",
+  "version": "0.0.2",
+  "description": "Dynamically observe all properties in an array element's object (and clean up afterward)",
   "directories": {
     "doc": "doc",
     "test": "tests"

@@ -57,15 +57,98 @@ test('DOES observe changed properties created after call to create() which are n
   let watched = TestObject.create({
     bar: 'bar',
     _propertyChangedCallback: () => {
-      assert.equal('barred', watched.bar);
+      assert.equal('baz', watched.bar, 'callback called and bar property is now set to "baz"');
+      watched.set('success', true);
       done();
     }
   });
-  assert.equal('bar', watched.bar);
-  watched.set('bar','barred'); 
+  assert.equal(watched.bar, 'bar', 'the bar property was initialized at create time with value of "bar"');
+  watched.set('bar','baz'); 
   
   run.later( () => {
-    assert.ok(false, 'Observation of "bar" property change did not happen');
-  },50);
+    const success = watched.get('success');
+    assert.ok(success, 'Observation of "bar" property happened; finishing test');
+    if (!success) {
+      done();      
+    }
+  },25);
 });
+
+test('Observers are removed after destroyObservers called', function(assert) {
+  let done = assert.async();
+  let done2 = assert.async();
+  assert.expect(4);
+  let watched = TestObject.create({
+    bar: 'bar',
+    _propertyChangedCallback: () => {
+      const bar = watched.get('bar');
+      if(bar === 'baz') {
+        assert.equal(bar, 'baz', 'INIT: callback called and bar property is now set to "baz"');
+        watched.set('success', true);
+        done();        
+      } else if(bar === 'stop watching me') {
+        assert.notEqual(bar, 'stop watching me', 'still observing property AFTER destroy was called!');
+        watched.set('success', false);
+        done2();
+      }
+    }
+  });
+  assert.equal(watched.get('bar'), 'bar', 'the bar property was initialized at create time with value of "bar"');
+  watched.set('bar','baz'); 
+  
+  run.later( () => {
+    const success = watched.get('success');
+    assert.ok(success, 'INIT: Observation of "bar" property happened; now removing observer');
+    if (!success) {
+      done(); 
+    }
+    // post DESTROY test
+    watched.destroyObservers();
+    watched.set('bar','stop watching me'); 
+    run.later( () => {
+      assert.ok(watched.get('success'), 'The observer did NOT fire after call to destroyObservers');
+      done2();
+    },25);
+  },25);
+});
+
+
+test('Using ObserveAll on an external object', function(assert) {
+  let done = assert.async();
+  let done2 = assert.async();
+  let done3 = assert.async();
+  // assert.expect(4);
+  let object = Ember.Object.create({
+    item: new Ember.A([{id: 'foo'}, {id: 'bar'}, {id: 'baz'}]),
+    success: false
+  });
+  let watcher = TestObject.create();
+  
+  assert.equal(typeOf(object.get('item')), 'array', 'INIT: the item property is an array of objects');
+  assert.equal(object.get('item.length'), 3, 'INIT: there should be three items in the array');
+  watcher.observeAll(object.item, (key) => {
+    assert.ok(true,'Observed change key was: ' + key);
+    assert.equal(object.get('item.0.id'), 'foey', 'Observed change of first array item to foey');
+    object.set('success', true);
+    done();
+  });
+  object.set('item.0.id', 'foey');
+  run.later( () => {
+    assert.ok(object.get('success'), 'Observer caught change to object property being set.');
+    done2();
+    watcher.destroyObservers();
+    object.set('success', false);
+    object.set('item.0.id', 'fe fi fo');
+    run.later( () => {
+      assert.ok(!object.get('success'), 'After removing the observers setting the array item does not fire an observer');
+      done3();
+    },25); 
+    
+    
+  },50); 
+  
+  
+});
+
+
 
